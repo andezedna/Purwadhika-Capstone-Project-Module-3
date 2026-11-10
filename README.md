@@ -153,7 +153,7 @@ Pada bagian ini dilakukan penjelasan model Logistic Regression melalui:
 
 
 ## **Kesimpulan dan Saran**
-<br>
+
 ### **Kesimpulan**
 Model Final menggunakan model LogisticRegression dengan `penalty=l1`, `C=0.01`, `solver liblinear`, feature `tenure` dibinning menjadi 3 kelompok, resampling menggunakan metode `RandomOverSampling`. Model final menggunakan 10 dari 18 feature dan threshold 0.41. Performa model LogisticRegression terpilih dengan threshold 0.41 dapat menghemat biaya. Total biaya yang dikeluarkan dengan asumsi cost FP sebesar Rp 100,000 dan cost FN sebesar Rp 500,000 (ratio FP:FN = 1:5) sebesar Rp 41,300,000.<br>
 Model final tidak overfitting maupun underfitting. Model final merupakan hasil feature selection dengan membuang 8 feature yang koefisiennya dibawah 0.05 karena tidak menurunkan skor. Dengan begitu, model final dengan 10 feature lebih ringkas tanpa mengurangi performa.<br>
