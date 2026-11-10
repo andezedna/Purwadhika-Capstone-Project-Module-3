@@ -93,29 +93,51 @@ def user_input():
 # Menampilkan user input feature
 df_customer, submitted = user_input()
 
-# Bagi halaman jadi 2 kolom
-column_left, column_right=st.columns(2)
-
 # Import Model Fina LogisticRegression
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model = joblib.load(os.path.join(BASE_DIR, 'final_model_logreg.sav'))
 
-# Menampilkan dataframe di kolom pertama/kiri
-with column_left:
-    st.subheader("📝 Customer's Data 📝")
-    st.dataframe(df_customer.astype(str).T.rename(columns={0: "Value"}), width="stretch")
+# Membuat 2 tab : Prediction dan Feature Info
+tab_predict, tab_info = st.tabs(["Prediction", "Feature Info"])
 
-with column_right:
-    st.subheader("🔮 Customer Prediction 🔮")
-    if submitted:
-        kelas = model.predict(df_customer)
-        proba = model.predict_proba(df_customer)[0][1]
-        if kelas[0] == 1:
-            st.error("⚠️ Customer will CHURN")
+# Isi tab Prediction
+with tab_predict:
+    # Bagi halaman jadi 2 kolom
+    column_left, column_right=st.columns(2)
+    # Menampilkan dataframe di kolom pertama/kiri
+    with column_left:
+        st.subheader("📝 Customer's Data 📝")
+        st.dataframe(df_customer.astype(str).T.rename(columns={0: "Value"}), width="stretch")
+
+    with column_right:
+        st.subheader("🔮 Customer Prediction 🔮")
+        if submitted:
+            kelas = model.predict(df_customer)
+            proba = model.predict_proba(df_customer)[0][1]
+            if kelas[0] == 1:
+                st.error("⚠️ Customer will CHURN")
+            else:
+                st.success("✅ Customer will STAY")
+            st.write("")
+            st.metric("Churn Probability", f"{proba:.1%}")
+            st.progress(float(proba))
         else:
-            st.success("✅ Customer will STAY")
-        st.write("")
-        st.metric("Churn Probability", f"{proba:.1%}")
-        st.progress(float(proba))
-    else:
-        st.info("🪄 Click Predict in the sidebar to view the result 🪄")
+            st.info("🪄 Click Predict in the sidebar to view the result 🪄")
+
+# Isi tab Feature Info
+with tab_info:
+    st.markdown("""
+    | Feature | Description |
+    |---|---|
+    | **Dependents** | Whether the customer has dependents or not. |
+    | **tenure** | Number of months the customer has stayed with the company. |
+    | **OnlineSecurity** | Whether the customer has online security or not. |
+    | **OnlineBackup** | Whether the customer has online backup or not. |
+    | **InternetService** | Whether the client is subscribed to Internet service. |
+    | **DeviceProtection** | Whether the client has device protection or not. |
+    | **TechSupport** | Whether the client has tech support or not. |
+    | **Contract** | Type of contract according to duration. |
+    | **PaperlessBilling** | Bills issued in paperless form. |
+    | **MonthlyCharges** | Amount of charge for service on monthly bases. |
+    """)
+
