@@ -48,3 +48,97 @@ False Negative : Kita asumsikan cost untuk kehilangan pelanggan dan biaya akuisi
 Kita asumsikan cost False Positive dan False Negaative diatas dengan menggunakan ratio **FP:FN = 1:5**<br>
 <br>
 Dari penjelasan konsekuensi False Positive dan False Negative diatas, matriks yang cocok untuk adalah F2 karena cost FN lebih mahal daripada cost FP. Matriks F2 dapat menekan recall (menekan cost FN), namun dapat menekan precision (menekan FP) jika FP berlebihan.
+
+## **Data Understanding**
+**Context**<br>
+<br>
+Dataset mempresentasikan profil pelanggan yang telah meninggalkan perusahaan telekomunikasi. Istilah **Churn** dalam telekomunikasi dan layanan berbasis langganan lainnya merupakan situasi ketike pelanggan meninggalkan profider layanan tersebut.
+
+**Features**
+| Column | Description |
+| --- | --- |
+| Dependents | Status pelanggan memiliki tanggungan atau tidak |
+| Tenure | Jumlah bulan pelanggan sudah berlanggangan dengan perusahaan telekomunikasi |
+| OnlineSecurity | Status pelanggan memiliki Online Security atau tidak |
+| OnlineBackup | Status pelanggan memiliki Online Backup atau tidak |
+| InternetService | Status pelanggan berlangganan layanan internet atau tidak |
+| DeviceProtection | Status pelanggan memiliki perlindungan perangkat atau tidak |
+| TechSupport| Status pelanggan memiliki dukungan teknis atau tidak |
+| Contract | Jenis kontrak berdasarkan durasi |
+| PaperlessBilling | Tagihan dalam bentuk tanpa kertas (Yes/No) |
+| MonthlyCharges| Total biaya untuk layanan secara bulanan |
+| Churn | Status pelanggan **Churn** atau **Not Churn** |
+
+## **Step Pengerjaan**
+1. Exploratory Data Analysis (EDA)
+   Pada bagian ini dilakukan Exploratory Data Analysis (EDA) yang bertujuan sbb:
+   - Melihat distribusi data tiap kolom
+   - Mengetahui korelasi antarkolom
+   - Mengetahui persebaran data churn dan tidak churn (target) berdasarkan feature yang ada
+<br>
+2. Mendefinisikan X dan y
+   Pada Pada bagian ini mendefinisikan X yang berisi semua variabel sebagai feature dan Y sebagai target.<br>
+   - Dataframe X berisi semua kolom selain kolom `Churn` karena pada dataset tidak ada kolom sebagai primary key seperti customer ID
+   - Dataframe y berisi kolom `Churn` sebagai target dan ubah nilai pada kolom tersebut menjadi numerik. `Yes` diubah menjadi `1` dan `No` diubah menjadi `0`.
+<br>
+3. Data splitting
+   Pada bagian ini, dilakukan pembagian data train dan test dengan proporsi `80:20`.
+<br>
+4. Data preprocessing
+   Pada bagian ini, dilakukan feature encoding untuk tiap feature.
+   - One Hot Encoding : Dependents, OnlineSecurity, OnlineBackup, InternetService, DeviceProtection, TechSupport, Contract, PaperlessBilling
+   - Robust Scaler : tenure, MonthlyCharges
+   - Binning : tenure
+  Pada bagian ini, dibangun 2 transformer, yaitu 1 transformer dengan feature tenure tidak dibinning dan 1 transformer dengan feature tenure dibinning.
+<br>
+5. Cross Validation
+   Pada bagian ini, dilakukan pengecekan skor tiap model dengan 2 transformer yang telah dibuat. Berikut model yang digunakan untuk pengecekan skor:
+   - LogisticRegression
+   - KNeighborsClassifier
+   - DecisionTreeClassifier
+   - VotingClassifier
+   - StackingClassifier
+   - BaggingClassifier
+   - RandomForestClassifier
+   - AdaBoostClassifier
+   - GradientBoostingClassifier
+    Pada tahap cross validation, dilakukan juga tanpa metode resampling dan dengan metode resampling. Pada tahap resampling, dilakukan 4x percobaan yaitu :
+  - Resampling dengan menggunakan metode `SMOTE` dengan transformer tanpa binning
+  - Resampling dengan menggunakan metode `RandomOverSampling (ROS)` dengan transformer tanpa binning
+  - Resampling dengan menggunakan metode `SMOTE` dengan transformer yang sudah dibinning
+  - Resampling dengan menggunakan metode `RandomOverSampling (ROS)` yang sudah dibinning
+6. Hyperparameter Tuning
+    Model yang dilakukan hyperparameter tuning ada 2, yaitu model LogisticRegression dan AdaBoostClassifier. Pemilihan model ini berdasarkan skor tertinggi pada tahap cross validation sebelumnya.
+<br>
+7. Evaluasi Model
+    Dari Dari percobaan hyperparameter tuning model `LogisticRegression` dan `AdaBoostClassifier` diatas diperoleh bahwa:
+    - Biaya total terkecil untuk model `LogisticRegression` adalah Rp 41,300,000 dengan threshold 0.41
+    - Biaya total terkecil untuk model `AdaBoostClassifier` adalah Rp 43,800,000 dengan threshold 0.26
+    Dari hasil tersebut, model final yang dipilih adalah model `LogisticRegression`. Selanjutnya, kita akan coba lakukan model-based feature selection pada model terbaik `LogisticRegression` yang terpilih.
+<br>
+8. Interpretasi Model
+  Pada bagian ini, dilakukan explanasi dari model Logistic Regression, SHAP, dan LIME.
+<br>
+<br>
+## **Kesimpulan dan Saran**
+**Kesimpulan**
+Model Final menggunakan model LogisticRegression dengan `penalty=l1`, `C=0.01`, `solver liblinear`, feature `tenure` dibinning menjadi 3 kelompok, resampling menggunakan metode `RandomOverSampling`. Model final menggunakan 10 dari 18 feature dan threshold 0.41. Performa model LogisticRegression terpilih dengan threshold 0.41 dapat menghemat biaya. Total biaya yang dikeluarkan dengan asumsi cost FP sebesar Rp 100,000 dan cost FN sebesar Rp 500,000 (ratio FP:FN = 1:5) sebesar Rp 41,300,000.<br>
+Model final tidak overfitting maupun underfitting. Model final merupakan hasil feature selection dengan membuang 8 feature yang koefisiennya dibawah 0.05 karena tidak menurunkan skor. Dengan begitu, model final dengan 10 feature lebih ringkas tanpa mengurangi performa.<br>
+Faktor yang dapat menurunkan risiko seorang pelanggan akan churn adalah kontrak tahunan (1 dan 2 tahun), tenure yang panjang, dan penggunaan OnlineSecurity. Faktor yang dapat menaikkan risiko seorang pelanggan akan churn adalah tenure paling pendek (0-9 bulan), penggunaan jenis layanan Fiber Optic, dan tagihan bulanan yang tinggi.<br>
+
+**Saran**
+1. Prioritaskan pelanggan di tahun pertama (tenure di bawah 12 bulan), menggunakan kontrak bulanan (month-to-month), dan menggunakan jenis layanan Fiber Optic karena pelanggan ini yang diprediksi akan churn.
+2. Peningkatan marketing untuk menargetkan pelanggan mengambil kontrak tahunan (1 & 2 tahun) karena pelanggan ini yang diprediksi tidak akan churn.
+3. Melakukan evaluasi jenis layanan Fiber Optic seperti evaluasi harga, fasilitas, dan kualitas karena pelanggan yang menggunakan Fiber Optic diprediksi akan churn.
+4. Peningkatan marketing untuk menawarkan layanan OnlineSecurity dan OnlineBackup sebagai bagian dari paket untuk menurunkan risiko churn.
+Model ini dapat digunakan oleh tim Customer Relationship Management (CRM) untuk mengetahui probabilitas churn tiap pelanggan. Dengan begitu, tim CRM dapat memprioritaskan pelanggan yang cocok diberikan penawaran. Selain itu, tim Marketing, Finance, dan Manajemen juga dapat menggunakan hasil faktor-faktor risiko dan analisis biaya sehingga dapat menyusun strategi dan anggaran selanjutnya.
+<br>
+
+**Limitasi Model**
+1. Cost FP Rp 100,000 dan cost FN Rp 500,000 (ratio FP:FN = 1:5) hanya asumsi. Kesimpulan cost dapat berubah menyesuaikan dengan data keuangan perusahaan.
+2. Threshold dari model final sebesar 0.41 dipilih dari data test.
+3. Feature dari dataset terbatas sehingga feature pada final model juga terbatas. Masih ada banyak feature lain yang dapat memengaruhi seorang pelanggan akan churn atau tidak seperti tingkat kepuasan pelanggan, riwayat keluhan, dan promo paket.
+
+
+**Link Streamlit** : https://purwadhika-capstone-project-module-3-gj62jsucftyrrqcycryeuc.streamlit.app/
+**Link Presentasi** : https://canva.link/uovlsx96e61nhwx
