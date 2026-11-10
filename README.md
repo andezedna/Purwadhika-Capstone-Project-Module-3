@@ -1,5 +1,5 @@
 # Purwadhika-Capstone-Project-Module-3
-**Judul : Prediksi Pelanggan Churn Menggunakan Machine Learning di Industri Telekomunikasi**<br>
+**Topik: Prediksi Pelanggan Churn Menggunakan Machine Learning di Industri Telekomunikasi**<br>
 **Oleh : Annisa Andez Aunillah**
 <br>
 ## **Business Problem Understanding**
