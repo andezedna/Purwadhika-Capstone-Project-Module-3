@@ -191,4 +191,5 @@ Pada bagian ini dilakukan penjelasan model Logistic Regression melalui:
 3. Feature pada dataset terbatas, sehingga feature pada model final juga terbatas. Masih ada faktor lain yang dapat memengaruhi churn, seperti tingkat kepuasan pelanggan, riwayat keluhan, dan promo paket.
 
 **Link Streamlit** : https://purwadhika-capstone-project-module-3-gj62jsucftyrrqcycryeuc.streamlit.app/
+
 **Link Presentasi** : https://canva.link/uovlsx96e61nhwx
